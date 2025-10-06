@@ -44,11 +44,19 @@ export const useTasksStore = defineStore('tasks', {
       this.tasks.push(task)
       console.log(this.tasks)
     },
+    updateTask(id: ID, newColumnId: ID) {
+      const task = this.tasks.find((task) => task.id === id)
+      if (task) {
+        task.columnId = newColumnId
+      }
+    },
   },
   getters: {
     getTasks(state) {
       return function (tasksIds: ID[]) {
-        return state.tasks.filter((task) => tasksIds.includes(task.id))
+        return state.tasks
+          .filter((task) => tasksIds.includes(task.id))
+          .sort((a, b) => tasksIds.indexOf(a.id) - tasksIds.indexOf(b.id))
       }
     },
   },

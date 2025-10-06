@@ -4,23 +4,49 @@
       <div class="column__title__indicator" />
       <h1>{{ column.columnName }}</h1>
     </div>
-    <div class="column__task__list">
-      <TaskComponent v-for="task in tasks" :key="task.id" :task="task" />
-    </div>
+    <draggable
+      v-model="tasks"
+      item-key="id"
+      animation="200"
+      class="column__task__list"
+      group="tasks"
+      @change="onChange"
+    >
+      <template #item="{ element: task }">
+        <TaskComponent :task="task" />
+      </template>
+    </draggable>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useTasksStore } from '@/stores/tasks.store'
-import { computed } from 'vue'
+import { computed, toRaw } from 'vue'
+import draggable from 'vuedraggable'
 import TaskComponent from './TaskComponent.vue'
+import { useColumnsStore } from '@/stores/columns.store'
 
 const { column } = defineProps(['column'])
-const tasksStore = useTasksStore()
 
-const tasks = computed(() => {
-  return tasksStore.getTasks(column.tasksOrder)
+const tasksStore = useTasksStore()
+const columnsStore = useColumnsStore()
+
+const tasks = computed({
+  get() {
+    return tasksStore.getTasks(column.tasksOrder)
+  },
+  set(newTasks) {
+    const newOrder = newTasks.map((task) => task.id)
+    columnsStore.updateTaskOrder(column.id, newOrder)
+  },
 })
+
+function onChange(event: any) {
+  if (event.added) {
+    const { id } = toRaw(event.added.element)
+    tasksStore.updateTask(id, column.id)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -32,6 +32,12 @@ export const useColumnsStore = defineStore('columns', {
     createColumn(column: Column) {
       this.columns.push(column)
     },
+    updateTaskOrder(columnId: ID, newTaskOrder: ID[]) {
+      const column = this.columns.find((col) => col.id === columnId)
+      if (column) {
+        column.tasksOrder = newTaskOrder
+      }
+    },
   },
   getters: {
     getColumns(state) {
